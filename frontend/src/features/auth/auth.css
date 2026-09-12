@@ -32,6 +32,7 @@ main{
 
 .form-container form .input-group input{
     background-color: whitesmoke;
+    color:black;
     padding: 10px;
     min-width: 300px;
     border-radius:10px;
@@ -57,4 +58,12 @@ main{
 a{
     text-decoration: none;
     color:rgb(236,49,90);
+}
+
+.loading{
+    height: 100vh;
+    width:100%;
+    display:flex;
+    justify-content: center;;
+    align-items: center;
 }

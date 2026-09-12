@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 
 /**
  * @route POST /api/auth/register
- * @description Register a new user
+ * @description Register a new user requires email, name, username and password
  * @access Public
  */
 async function registerUser(req,res){
@@ -45,7 +45,6 @@ async function registerUser(req,res){
 
     res.cookie("token",refreshToken,{
         httpOnly:true,
-        secure:true,
         sameSite:'strict',
         maxAge:7*24*60*60*1000 //7days
     })
@@ -63,7 +62,7 @@ async function registerUser(req,res){
 }
 /**
  * @route POST /api/auth/login
- * @description Login a user
+ * @description Login a user, requires Email and password
  * @access Public 
  */
 async function loginUser(req,res){
@@ -92,7 +91,6 @@ async function loginUser(req,res){
 
     res.cookie("token", refreshToken, {
         httpOnly:true,
-        secure:true,
         sameSite:'strict',
         maxAge:7*24*60*60*1000 //7days
     })
