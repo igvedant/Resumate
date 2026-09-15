@@ -101,9 +101,13 @@ const reportJsonSchema= {
                 },
                 required:["day","focus","tasks"]
             }
-        }
+        },
+        jobTitle:{
+            type:"string",
+            description:"The job title for which the candidate is applying for"
+        },
     },
-    required:["matchScore","technicalQuestions", "behaviouralQuestions", "skillGaps","preperationPlan"]
+    required:["matchScore","technicalQuestions", "behaviouralQuestions", "skillGaps","preperationPlan", "jobTitle"]
 }
 
 const reportSchema = z.fromJSONSchema(reportJsonSchema);

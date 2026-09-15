@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/report",
+    path: "/report/:reportId",
     element: (
       <Protected>
         <Report />

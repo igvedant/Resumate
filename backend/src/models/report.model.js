@@ -67,7 +67,11 @@ const reportSchema= new mongoose.Schema({
             type:String,
             required:true,
         }]
-    },{_id:false})]
+    },{_id:false})],
+    jobTitle:{
+        type:String,
+        required:[true, "Job Title is required"],
+    }
 },{timestamps:true});
 
 module.exports=mongoose.model("reports",reportSchema);
