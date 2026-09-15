@@ -24,9 +24,11 @@ const reportSchema= new mongoose.Schema({
     },
     resume:{
         type:String,
+        required:true,
     },
     selfDescription:{
         type:String,
+        required:true,
     },
     matchScore:{
         type:Number,
