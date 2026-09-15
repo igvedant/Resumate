@@ -18,6 +18,11 @@ const technicalQuestionsSchema = new mongoose.Schema({
 });
 
 const reportSchema= new mongoose.Schema({
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"users",
+        required:true,
+    },
     jobDescription:{
         type:String,
         required:[true,"Job Description is required"],
@@ -63,6 +68,6 @@ const reportSchema= new mongoose.Schema({
             required:true,
         }]
     },{_id:false})]
-})
+},{timestamps:true});
 
 module.exports=mongoose.model("reports",reportSchema);
