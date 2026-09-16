@@ -1,10 +1,33 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import "../interviewReport.css";
+import { useReport } from "../hooks/useReport";
+import { useNavigate } from "react-router";
+import { ThreeDot } from "react-loading-indicators";
 
 const Home = () => {
-  const handleSubmit = (event) => {
+  const navigate = useNavigate();
+  const [selfDescription, setSelfDescription] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [resumeName, setResumeName] = useState("");
+  const resumeRef = useRef(null);
+  const { handleGenerateReport, loading, reportIds } = useReport();
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    const id = await handleGenerateReport({
+      resume: resumeRef.current.files[0],
+      selfDescription,
+      jobDescription,
+    });
+    navigate("/report/" + id);
   };
+
+  if (loading) {
+    return (
+      <div className="loading">
+        <ThreeDot color="rgb(236,49,90)" size="medium" text="" textColor="" />
+      </div>
+    );
+  }
 
   return (
     <main className="report-page">
@@ -27,6 +50,7 @@ const Home = () => {
               placeholder="Paste the job description here..."
               rows="7"
               required
+              onChange={(e) => setJobDescription(e.target.value)}
             />
           </div>
 
@@ -37,7 +61,7 @@ const Home = () => {
                 +
               </span>
               <span>
-                <strong>Upload your resume</strong>
+                <strong>{resumeName || "Upload your resume"}</strong>
                 <small>PDF files only</small>
               </span>
               <input
@@ -46,6 +70,10 @@ const Home = () => {
                 type="file"
                 accept="application/pdf,.pdf"
                 required
+                ref={resumeRef}
+                onChange={(event) => {
+                  setResumeName(event.target.files?.[0]?.name || "");
+                }}
               />
             </label>
           </div>
@@ -58,6 +86,7 @@ const Home = () => {
               placeholder="Tell us about your strengths, goals, and experience..."
               rows="7"
               required
+              onChange={(e) => setSelfDescription(e.target.value)}
             />
           </div>
 
@@ -65,6 +94,66 @@ const Home = () => {
             Generate Report <span aria-hidden="true">-&gt;</span>
           </button>
         </form>
+
+        <section className="allReports" aria-labelledby="reports-heading">
+          <div className="reports-heading">
+            <div>
+              <p className="section-kicker">Your workspace</p>
+              <h2 id="reports-heading">Previously generated reports</h2>
+            </div>
+            <span className="report-count">
+              {reportIds?.length || 0}{" "}
+              {reportIds?.length === 1 ? "report" : "reports"}
+            </span>
+          </div>
+
+          {reportIds?.length ? (
+            <ul className="report-list">
+              {reportIds.map((report) => (
+                <li key={report._id}>
+                  <a className="report-card" href={`/report/${report._id}`}>
+                    <div className="report-card-mark" aria-hidden="true">
+                      {report.jobTitle?.charAt(0) || "R"}
+                    </div>
+                    <div className="report-card-content">
+                      <h3>{report.jobTitle || "Interview report"}</h3>
+                      <p>
+                        Created{" "}
+                        {new Date(report.createdAt).toLocaleDateString(
+                          undefined,
+                          { month: "short", day: "numeric", year: "numeric" },
+                        )}
+                      </p>
+                    </div>
+                    <div className="report-card-score">
+                      {report.matchScore ? (
+                        <>
+                          <strong>{report.matchScore}</strong>
+                          <span>/100 match</span>
+                        </>
+                      ) : (
+                        <span>View report</span>
+                      )}
+                    </div>
+                    <span className="report-card-arrow" aria-hidden="true">
+                      -&gt;
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="reports-empty">
+              <span className="reports-empty-icon" aria-hidden="true">
+                +
+              </span>
+              <div>
+                <h3>Your report library is empty</h3>
+                <p>Generate your first report and it will appear here.</p>
+              </div>
+            </div>
+          )}
+        </section>
       </section>
     </main>
   );

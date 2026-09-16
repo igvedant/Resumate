@@ -65,7 +65,7 @@ async function fetchReportById(req,res){
  * @description This controller fetches all the reports of the logged in user
  */
 async function fetchAllReports(req,res){
-    const reports = (await reportModel.find({user:req.user._id})).sort({createdAt:-1}).select("-resume -selfDescription -jobDescription -matchScore -technicalQuestions -behaviouralQuestions -skillGaps -preperationPlan");
+    const reports = await reportModel.find({user:req.user._id}).sort({createdAt:-1}).select("-resume -selfDescription -jobDescription -technicalQuestions -behaviouralQuestions -skillGaps -preperationPlan -__v");
 
     if(!reports || reports.length ==0){
         return res.status(404).json({

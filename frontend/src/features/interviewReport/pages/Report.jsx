@@ -1,69 +1,8 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router";
+import React, { useEffect, useState } from "react";
+import { useReport } from "../hooks/useReport";
 import "../interviewReport.css";
-
-const previewReport = {
-  matchScore: 78,
-  technicalQuestions: [
-    {
-      question: "How would you design a reliable API for this role?",
-      intention:
-        "To assess your system design thinking and understanding of reliability.",
-      answer:
-        "Start with the requirements, explain the API contract, validation, error handling, observability, and how you would scale it.",
-    },
-    {
-      question: "How do you approach debugging a production issue?",
-      intention: "To understand your troubleshooting process under pressure.",
-      answer:
-        "Explain how you reproduce and narrow the issue, inspect logs and metrics, communicate impact, apply a safe fix, and document the cause.",
-    },
-  ],
-  behaviouralQuestions: [
-    {
-      question: "Tell me about a time you handled conflicting priorities.",
-      intention: "To evaluate communication, ownership, and decision-making.",
-      answer:
-        "Use the STAR structure: describe the context, explain how you prioritized with stakeholders, share the action you took, and quantify the result.",
-    },
-  ],
-  skillGaps: [
-    { skill: "System design", severnity: "medium" },
-    { skill: "Cloud observability", severnity: "low" },
-    { skill: "Distributed systems", severnity: "high" },
-  ],
-  preperationPlan: [
-    {
-      day: 1,
-      focus: "Role and project foundation",
-      tasks: [
-        "Review the job requirements",
-        "Prepare a two-minute introduction",
-      ],
-    },
-    {
-      day: 2,
-      focus: "Technical depth",
-      tasks: [
-        "Revise core technical concepts",
-        "Practice one system design problem",
-      ],
-    },
-    {
-      day: 3,
-      focus: "Interview simulation",
-      tasks: [
-        "Answer behavioural questions aloud",
-        "Run a timed mock interview",
-      ],
-    },
-  ],
-  jobDescription:
-    "Senior software engineer responsible for building reliable products, collaborating with cross-functional teams, and improving platform quality.",
-  selfDescription:
-    "I enjoy solving complex product problems, learning quickly, and working closely with teams to ship useful software.",
-  resume: "Resume content is available after the report is generated.",
-};
+import { useParams } from "react-router";
+import { ThreeDot } from "react-loading-indicators";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -92,9 +31,29 @@ const QuestionCard = ({ item, index }) => (
 );
 
 const Report = () => {
-  const { state } = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
-  const report = state?.report || previewReport;
+  const { report, loading, handleGetReportById } = useReport();
+  // const { reportId } = useParams();
+
+  // useEffect(() => {
+  //   const fetchReport = async () => {
+  //     const cachedReportId = report?._id?.toString();
+
+  //     if (reportId && cachedReportId !== reportId) {
+  //       await handleGetReportById({ reportId });
+  //     }
+  //   };
+
+  //   fetchReport();
+  // }, [reportId, report?._id]);
+
+  if (loading || !report) {
+    return (
+      <div className="loading">
+        <ThreeDot color="rgb(236,49,90)" size="medium" text="" textColor="" />
+      </div>
+    );
+  }
 
   const renderQuestions = (questions) => (
     <div className="question-list">
@@ -292,9 +251,9 @@ const InputSummary = ({ report }) => (
       description="These are the details the report was built from."
     />
     <div className="input-summary-grid">
+      <InputCard title="JobTitle" value={report.jobTitle} />
       <InputCard title="Job description" value={report.jobDescription} />
       <InputCard title="Self description" value={report.selfDescription} />
-      <InputCard title="Resume" value={report.resume} />
     </div>
   </div>
 );

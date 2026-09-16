@@ -14,11 +14,11 @@ const router = Router();
 router.post("/generate", authMiddleware.validateToken, upload.single("resume"), reportController.reportGenerator);
 
 /**
- * @route GET /api/report/:id
+ * @route GET /api/report/fetch/:id
  * @description fetches the report by id
  * @access private
  */
-router.get("/:id", authMiddleware.validateToken, reportController.fetchReportById);
+router.get("/fetch/:id", authMiddleware.validateToken, reportController.fetchReportById);
 
 /**
  * @route GET /api/reports

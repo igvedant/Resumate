@@ -1,4 +1,4 @@
-const axios = require("axios");
+import axios from "axios";
 
 const api=axios.create({
     baseURL:"http://localhost:3000",
@@ -30,13 +30,12 @@ export async function generateReport({resumeFile, selfDescription, jobDescriptio
 }
 
 export async function getReportById({reportId}){
-    const response = await api.get(`/api/report/${reportId}`);
+    const response = await api.get(`/api/report/fetch/${reportId}`);
 
     return response.data;
 }
 
 export async function getAllReports(){
     const response = await api.get("/api/report/getAll");
-
     return response.data;
 }

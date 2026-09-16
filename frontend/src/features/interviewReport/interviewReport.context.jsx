@@ -3,7 +3,7 @@ import { createContext, useState } from "react";
 export const InterviewReportContext = createContext();
 
 export const InterviewReportProvider = ({ children }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [report, setReport] = useState(null);
   const [reportIds, setReportIds] = useState(null);
 
