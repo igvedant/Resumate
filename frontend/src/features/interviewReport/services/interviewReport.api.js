@@ -8,7 +8,7 @@ export async function generateReport({resumeFile, selfDescription, jobDescriptio
     formData.append("jobDescription", jobDescription);
 
     const response = await api.post("/api/report/generate", formData, {
-        header:{
+        headers:{
             "Content-Type": "multipart/form-data",
         },
     });

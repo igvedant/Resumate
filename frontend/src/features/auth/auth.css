@@ -67,3 +67,9 @@ a{
     justify-content: center;;
     align-items: center;
 }
+
+.form-error{
+    margin: 0;
+    color: rgb(255, 141, 164);
+    font-size: 0.9rem;
+}
