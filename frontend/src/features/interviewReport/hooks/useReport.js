@@ -8,10 +8,12 @@ export const useReport=()=>{
     const {loading, setLoading, report, setReport, reportIds, setReportIds} = context;
     const { reportId } = useParams();
     const [error, setError] = useState("");
+    const [errorStatus, setErrorStatus] = useState(null);
 
     const handleGenerateReport = useCallback(async({resume, selfDescription, jobDescription})=>{
         setLoading(true);
         setError("");
+        setErrorStatus(null);
         try{
             const data = await generateReport({resumeFile:resume, selfDescription, jobDescription});
             setReport(data.report);
@@ -27,10 +29,12 @@ export const useReport=()=>{
     const handleGetReportById = useCallback(async({reportId})=>{
         setLoading(true);
         setError("");
+        setErrorStatus(null);
         try{
             const data = await getReportById({reportId});
             setReport(data.report);
         }catch(err){
+            setErrorStatus(err.response?.status || null);
             setError(err.response?.data?.message || err.message || "Unable to load report");
         }finally{
             setLoading(false);
@@ -40,6 +44,7 @@ export const useReport=()=>{
     const handleGetAllReports= useCallback(async()=>{
         setLoading(true);
         setError("");
+        setErrorStatus(null);
         try{
             const data = await getAllReports();
             setReportIds(data.reports);
@@ -69,7 +74,7 @@ export const useReport=()=>{
         const loadReports = async () => {
             if (reportId && cachedReportId !== reportId) {
                 await handleGetReportById({ reportId });
-            } else if (!reportId && !reportIds?.length && !cachedReportId) {
+            } else if (!reportId && reportIds === null && !cachedReportId) {
                 await handleGetAllReports();
             }
         };
@@ -77,5 +82,5 @@ export const useReport=()=>{
         loadReports();
     },[report, reportId, reportIds, handleGetReportById, handleGetAllReports]);
 
-    return {loading, error, report, reportIds, handleGenerateReport, handleGetReportById, handleGetAllReports, handleUpdateResume};
+    return {loading, error, errorStatus, report, reportIds, handleGenerateReport, handleGetReportById, handleGetAllReports, handleUpdateResume};
 }

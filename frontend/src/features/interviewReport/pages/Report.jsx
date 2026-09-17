@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useReport } from "../hooks/useReport";
 import "../interviewReport.css";
 import { ThreeDot } from "react-loading-indicators";
+import { useNavigate } from "react-router";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -30,10 +31,17 @@ const QuestionCard = ({ item, index }) => (
 );
 
 const Report = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [downloadingResume, setDownloadingResume] = useState(false);
   const [downloadError, setDownloadError] = useState("");
-  const { report, loading, handleUpdateResume } = useReport();
+  const { report, loading, errorStatus, handleUpdateResume } = useReport();
+
+  useEffect(() => {
+    if (errorStatus === 404) {
+      navigate("/", { replace: true });
+    }
+  }, [errorStatus, navigate]);
 
   if (loading || !report) {
     return (
