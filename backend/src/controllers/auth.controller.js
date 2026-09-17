@@ -3,6 +3,13 @@ const { generateAccessToken, generateRefreshToken, verifyRefreshToken } =require
 const userModel=require("../models/user.model");
 const bcrypt=require("bcrypt");
 
+const refreshCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 
 /**
  * @route POST /api/auth/register
@@ -11,12 +18,6 @@ const bcrypt=require("bcrypt");
  */
 async function registerUser(req,res){
     const {email,name,username,password}=req.body;
-
-    if(!email || !name || !username || !password){
-        return res.status(400).json({
-            message:"All field are required"
-        })
-    }
 
     const userExists = await userModel.findOne({
         $or:[
@@ -29,12 +30,7 @@ async function registerUser(req,res){
         })
     }
 
-    if (typeof password !== "string" || password.length < 8) {
-        return res.status(400).json({
-            message: "Password must be at least 8 characters",
-        });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await userModel.create({
         email,
@@ -46,11 +42,7 @@ async function registerUser(req,res){
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
-    res.cookie("token",refreshToken,{
-        httpOnly:true,
-        sameSite:'strict',
-        maxAge:7*24*60*60*1000 //7days
-    })
+    res.cookie("token", refreshToken, refreshCookieOptions);
 
     return res.status(201).json({
         message:"User created successfully",
@@ -60,7 +52,7 @@ async function registerUser(req,res){
             email:user.email,
             username:user.username,
         },
-        token:accessToken
+        accessToken
     });
 }
 /**
@@ -70,16 +62,10 @@ async function registerUser(req,res){
  */
 async function loginUser(req,res){
     const {email,password} = req.body;
-    if(!email || !password){
-        return res.status(400).json({
-            message:"Email and password are required"
-        })
-    }
-
     const user = await userModel.findOne({email}).select("+password");
     if(!user){
-        return res.status(400).json({
-            message:"User not found with this email"
+        return res.status(401).json({
+            message:"Invalid email or password"
         })
     }
 
@@ -92,11 +78,7 @@ async function loginUser(req,res){
     const accessToken= generateAccessToken(user._id);
     const refreshToken=generateRefreshToken(user._id);
 
-    res.cookie("token", refreshToken, {
-        httpOnly:true,
-        sameSite:'strict',
-        maxAge:7*24*60*60*1000 //7days
-    })
+    res.cookie("token", refreshToken, refreshCookieOptions);
 
     return res.status(200).json({
         message:"User Logged in successfully",
@@ -137,7 +119,12 @@ async function refreshToken(req,res){
         })
     }
 
+    await blacklistedTokenModel.create({refreshToken});
+
     const newAccessToken = generateAccessToken(decoded.userId);
+    const newRefreshToken = generateRefreshToken(decoded.userId);
+    res.cookie("token", newRefreshToken, refreshCookieOptions);
+
     res.status(200).json({
         message:"New token generated successfully",
         accessToken:newAccessToken,
@@ -153,7 +140,7 @@ async function logoutUser(req,res){
     const refreshToken = req.cookies.token;
 
     if(!refreshToken){
-        res.status(401).json({
+        return res.status(401).json({
             message:"Unauthorized request"
         })
     }
@@ -162,9 +149,9 @@ async function logoutUser(req,res){
         refreshToken,
     })
 
-    res.clearCookie('token');
+    res.clearCookie('token', refreshCookieOptions);
 
-    res.status(201).json({message:"Logged Out"});
+    res.status(200).json({message:"Logged Out"});
 }
 
 /**

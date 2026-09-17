@@ -3,8 +3,9 @@ const mongoose = require("mongoose");
 const blacklistedTokenSchema= new mongoose.Schema({
     accessToken:{
         type:String,
-        required:true,
+        required:false,
         unique:true,
+        sparse:true,
     },
     refreshToken:{
         type:String,

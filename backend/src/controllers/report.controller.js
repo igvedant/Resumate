@@ -1,4 +1,5 @@
 const reportModel = require("../models/report.model");
+const mongoose = require("mongoose");
 const pdfParse = require("pdf-parse");
 const { generateReport, updateResume } = require("../services/ai.service");
 
@@ -10,10 +11,22 @@ async function reportGenerator(req,res){
     if (!req.file) {
         return res.status(400).json({ message: "Resume PDF is required" });
     }
-    const resumeContent = await (new pdfParse.PDFParse({data: req.file.buffer}).getText());
-    
-    const {selfDescription, jobDescription}= req.body;
 
+    if (req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({ message: "Resume must be a PDF file" });
+    }
+
+    const {selfDescription, jobDescription}= req.body;
+    if (!selfDescription || !jobDescription) {
+        return res.status(400).json({ message: "Descriptions are required" });
+    }
+
+    const resumeContent = await (new pdfParse.PDFParse({data: req.file.buffer}).getText());
+
+    if (!resumeContent.text.trim()) {
+        return res.status(400).json({ message: "Resume PDF contains no readable text" });
+    }
+    
     const generatedReport = await generateReport({
         resume:resumeContent.text,
         selfDescription, 
@@ -74,12 +87,6 @@ async function fetchReportById(req,res){
  */
 async function fetchAllReports(req,res){
     const reports = await reportModel.find({user:req.user._id}).sort({createdAt:-1}).select("-resume -selfDescription -jobDescription -technicalQuestions -behaviouralQuestions -skillGaps -preperationPlan -__v");
-
-    if(!reports || reports.length ==0){
-        return res.status(404).json({
-            message:"No reports found"
-        })
-    }
 
     res.status(200).json({
         message:"Reports fetched successfully",
