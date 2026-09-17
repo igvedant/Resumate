@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../auth.css";
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../hooks/useAuth";
@@ -8,12 +8,12 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const { loading, handleLogin } = useAuth();
+  const { loading, error, handleLogin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleLogin({ email, password });
-    navigate("/");
+    const success = await handleLogin({ email, password });
+    if (success) navigate("/");
   };
 
   if (loading) {
@@ -33,6 +33,8 @@ const Login = () => {
             <input
               type="email"
               name="email"
+              autoComplete="email"
+              required
               placeholder="Enter your email"
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -40,13 +42,22 @@ const Login = () => {
           <div className="input-group">
             <label htmlFor="password">Password</label>
             <input
-              type="text"
+              type="password"
               name="password"
+              autoComplete="current-password"
+              required
               placeholder="Enter your password"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="Submit">Login</button>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button type="submit" disabled={loading}>
+            Login
+          </button>
           <p>
             Not Registered?
             <Link to="/register"> Register</Link>

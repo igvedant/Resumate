@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../auth.css";
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../hooks/useAuth";
@@ -10,12 +10,12 @@ const Register = () => {
   const [name, setName] = useState();
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
-  const { loading, handleRegister } = useAuth();
+  const { loading, error, handleRegister } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleRegister({ email, name, username, password });
-    navigate("/");
+    const success = await handleRegister({ email, name, username, password });
+    if (success) navigate("/");
   };
 
   if (loading) {
@@ -35,6 +35,8 @@ const Register = () => {
             <input
               type="email"
               name="email"
+              autoComplete="email"
+              required
               placeholder="Enter your email"
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -42,8 +44,10 @@ const Register = () => {
           <div className="input-group">
             <label htmlFor="name">Name</label>
             <input
-              type="text"
+              type="password"
               name="name"
+              autoComplete="name"
+              required
               placeholder="Enter your name"
               onChange={(e) => setName(e.target.value)}
             />
@@ -53,6 +57,8 @@ const Register = () => {
             <input
               type="text"
               name="username"
+              autoComplete="username"
+              required
               placeholder="Enter your username"
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -62,11 +68,21 @@ const Register = () => {
             <input
               type="text"
               name="password"
+              autoComplete="new-password"
+              minLength={8}
+              required
               placeholder="Enter your password"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="Submit">Register</button>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button type="submit" disabled={loading}>
+            Register
+          </button>
           <p>
             Already Registered?
             <Link to="/login"> Login</Link>

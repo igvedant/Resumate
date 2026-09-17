@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import "../interviewReport.css";
 import { useReport } from "../hooks/useReport";
 import { useNavigate } from "react-router";
@@ -9,16 +9,30 @@ const Home = () => {
   const [selfDescription, setSelfDescription] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [resumeName, setResumeName] = useState("");
+  const [formError, setFormError] = useState("");
   const resumeRef = useRef(null);
-  const { handleGenerateReport, loading, reportIds } = useReport();
+  const { handleGenerateReport, loading, error, reportIds } = useReport();
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setFormError("");
+    const resume = resumeRef.current.files?.[0];
+
+    if (!resume || resume.type !== "application/pdf") {
+      setFormError("Please choose a PDF resume.");
+      return;
+    }
+
+    if (resume.size > 3 * 1024 * 1024) {
+      setFormError("Your resume must be 3 MB or smaller.");
+      return;
+    }
+
     const id = await handleGenerateReport({
-      resume: resumeRef.current.files[0],
+      resume,
       selfDescription,
       jobDescription,
     });
-    navigate("/report/" + id);
+    if (id) navigate("/report/" + id);
   };
 
   if (loading) {
@@ -49,6 +63,7 @@ const Home = () => {
               name="jobDescription"
               placeholder="Paste the job description here..."
               rows="7"
+              maxLength={15000}
               required
               onChange={(e) => setJobDescription(e.target.value)}
             />
@@ -85,14 +100,20 @@ const Home = () => {
               name="selfDescription"
               placeholder="Tell us about your strengths, goals, and experience..."
               rows="7"
+              maxLength={15000}
               required
               onChange={(e) => setSelfDescription(e.target.value)}
             />
           </div>
 
-          <button className="generate-button" type="submit">
+          <button className="generate-button" type="submit" disabled={loading}>
             Generate Report <span aria-hidden="true">-&gt;</span>
           </button>
+          {(formError || error) && (
+            <p className="form-error" role="alert">
+              {formError || error}
+            </p>
+          )}
         </form>
 
         <section className="allReports" aria-labelledby="reports-heading">
