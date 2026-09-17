@@ -27,4 +27,11 @@ router.get("/fetch/:id", authMiddleware.validateToken, reportController.fetchRep
  */
 router.get("/getAll", authMiddleware.validateToken, reportController.fetchAllReports);
 
+/**
+ * @route POST /api/report/updateResume/:id
+ * @description updates the resume of the report by id
+ * @access private
+ */
+router.post("/updateResume/:id", authMiddleware.validateToken, reportController.downloadUpdatedResume);
+
 module.exports = router;

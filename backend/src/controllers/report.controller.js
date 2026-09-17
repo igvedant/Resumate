@@ -1,6 +1,6 @@
 const reportModel = require("../models/report.model");
 const pdfParse = require("pdf-parse");
-const { generateReport } = require("../services/ai.service");
+const { generateReport, updateResume } = require("../services/ai.service");
 
 /**
  * @description This controller generates report by taking - resume(pdf), selfDescription(text) and jobDescription(text) as input and returns the generated report
@@ -79,4 +79,31 @@ async function fetchAllReports(req,res){
     })
 }
 
-module.exports= {reportGenerator, fetchReportById, fetchAllReports};
+/**
+ * @description This controller updates the resume of the report by id and returns the updated resume as a pdf file
+ */
+async function downloadUpdatedResume(req,res){
+    const {id} = req.params;
+
+    if(!id){
+        return res.status(400).json({
+            message:"Report ID is required"
+        })
+    }
+
+    const report = await reportModel.findById(id);
+
+    if(!report){
+        return res.status(404).json({
+            message:"Report not found"
+        });
+    }
+
+    const upDatedResume = await updateResume({report});
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=updated_resume.pdf');
+    res.send(upDatedResume);
+}
+
+module.exports= {reportGenerator, fetchReportById, fetchAllReports, downloadUpdatedResume};

@@ -1,5 +1,6 @@
 const {GoogleGenAI} = require("@google/genai");
 const z = require("zod");
+const puppeteer = require("puppeteer");
 
 const ai = new GoogleGenAI({
     apiKey:process.env.GEMINI_API_KEY
@@ -168,4 +169,80 @@ async function generateReport({resume, selfDescription, jobDescription}){
     return report;
 }
 
-module.exports={generateReport};
+async function htmlToPdf(htmlContent){
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent, {waitUntil:"networkidle0"});
+    const pdfBuffer = await page.pdf({
+        format:"A4",
+        printBackground:true,
+        margin:{
+            top:"20mm",
+            bottom:"20mm",
+            left:"15mm",
+            right:"15mm"
+        } 
+    });
+    
+    await browser.close();
+    return pdfBuffer;
+}
+
+async function updateResume({report}){
+    const prompt = `
+                You are an expert resume writer and professional document designer.
+
+                Create a tailored, truthful, ATS-friendly resume in HTML using the candidate's original resume, target job description, and interview analysis report.
+
+                RULES:
+                - Use only facts from the original resume and report.
+                - Never invent skills, experience, employers, dates, certifications, achievements, or metrics.
+                - Improve wording naturally while preserving the candidate's authentic voice.
+                - Tailor relevant skills and experience to the target job without keyword stuffing.
+                - Remove irrelevant repetition and vague AI-like language.
+                - Use concise, human-sounding accomplishment bullets.
+                - Do not mention AI, this prompt, the report, or the tailoring process.
+                - Do not include a photo, icons, charts, progress bars, rating graphics, or unsupported claims.
+                - Make the resume suitable for conversion to PDF with Puppeteer.
+                - Use semantic HTML and clean, professional typography.
+                - Make the layout printable on A4 paper.
+                - Use only inline CSS inside a single <style> element.
+                - Do not use external fonts, external stylesheets, JavaScript, images, SVGs, or remote assets.
+                - Ensure the design is readable in black and white.
+                - Escape all HTML special characters correctly.
+
+                HTML REQUIREMENTS:
+                - Return only a complete HTML document.
+                - Include <!DOCTYPE html>, <html>, <head>, <meta charset="UTF-8">, <title>, and <body>.
+                - Use semantic elements such as header, main, section, h1, h2, h3, ul, and li.
+                - Keep the resume compact enough for approximately one or two pages.
+                - Use print-friendly CSS with A4 page sizing and sensible margins.
+                - Avoid page breaks inside individual experience entries where possible.
+                - Do not use Markdown.
+                - Do not wrap the response in triple backticks.
+                - Return HTML only. The first characters must be <!DOCTYPE html> and the final characters must be </html>.
+
+                ORIGINAL RESUME:
+                ${report.resume}
+
+                TARGET JOB DESCRIPTION:
+                ${report.jobDescription}
+
+                INTERVIEW ANALYSIS REPORT:
+                ${JSON.stringify(report, null, 2)}
+    `;
+
+    const interaction = await ai.interactions.create({
+        model:"gemini-3.1-flash-lite",
+        input:prompt,
+        response_format:{
+            type:"text",
+            mime_type:"text/html"
+        }
+    });
+
+    const resumeHtml =interaction.output_text.trim();
+    return htmlToPdf(resumeHtml);
+}
+
+module.exports={generateReport, updateResume};
