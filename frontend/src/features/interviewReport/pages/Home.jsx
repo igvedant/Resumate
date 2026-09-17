@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import "../interviewReport.css";
 import { useReport } from "../hooks/useReport";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { useNavigate } from "react-router";
 import { ThreeDot } from "react-loading-indicators";
 
@@ -12,6 +13,13 @@ const Home = () => {
   const [formError, setFormError] = useState("");
   const resumeRef = useRef(null);
   const { handleGenerateReport, loading, error, reportIds } = useReport();
+  const { handleLogout } = useAuth();
+
+  const handleLogoutClick = async () => {
+    await handleLogout();
+    navigate("/login", { replace: true });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setFormError("");
@@ -46,6 +54,16 @@ const Home = () => {
   return (
     <main className="report-page">
       <section className="report-shell" aria-labelledby="report-title">
+        <div className="report-shell-toolbar">
+          <button
+            className="logout-button"
+            type="button"
+            onClick={handleLogoutClick}
+            disabled={loading}
+          >
+            Log out
+          </button>
+        </div>
         <div className="report-intro">
           <p className="eyebrow">Interview readiness</p>
           <h1 id="report-title">Build your interview report</h1>

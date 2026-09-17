@@ -3,6 +3,7 @@ import { useReport } from "../hooks/useReport";
 import "../interviewReport.css";
 import { ThreeDot } from "react-loading-indicators";
 import { useNavigate } from "react-router";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -36,6 +37,12 @@ const Report = () => {
   const [downloadingResume, setDownloadingResume] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const { report, loading, errorStatus, handleUpdateResume } = useReport();
+  const { handleLogout } = useAuth();
+
+  const handleLogoutClick = async () => {
+    await handleLogout();
+    navigate("/login", { replace: true });
+  };
 
   useEffect(() => {
     if (errorStatus === 404) {
@@ -103,6 +110,16 @@ const Report = () => {
         className="report-shell report-view-shell"
         aria-labelledby="report-page-title"
       >
+        <div className="report-shell-toolbar">
+          <button
+            className="logout-button"
+            type="button"
+            onClick={handleLogoutClick}
+            disabled={loading}
+          >
+            Log out
+          </button>
+        </div>
         <header className="report-header">
           <div>
             <p className="eyebrow">Interview readiness / report</p>

@@ -37,12 +37,14 @@ export const useAuth=()=>{
     }
     const handleLogout = async()=>{
         setLoading(true);
+        setError("");
         try{
             await logout();
-            setUser(null);
         }catch(err){
             setError(err.response?.data?.message || err.message || "Unable to log out");
         }finally{
+            localStorage.removeItem("accessToken");
+            setUser(null);
             setLoading(false);
         }
     }
