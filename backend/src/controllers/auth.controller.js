@@ -1,9 +1,7 @@
 const blacklistedTokenModel =require("../models/blacklistedToken.model");
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } =require("../utils/token.util");
-
 const userModel=require("../models/user.model");
-const crypto=require("crypto");
-const jwt = require('jsonwebtoken'); 
+const bcrypt=require("bcrypt");
 
 
 /**
@@ -31,7 +29,12 @@ async function registerUser(req,res){
         })
     }
 
-    const hashedPassword = await crypto.createHash("sha256").update(password).digest("hex");
+    if (typeof password !== "string" || password.length < 8) {
+        return res.status(400).json({
+            message: "Password must be at least 8 characters",
+        });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await userModel.create({
         email,
@@ -80,9 +83,9 @@ async function loginUser(req,res){
         })
     }
 
-    if(user.password !== crypto.createHash("sha256").update(password).digest("hex")){
+    if(!(await bcrypt.compare(password,user.password))){
         return res.status(401).json({
-            message:"Invalid password"
+            message:"Invalid email or password"
         })
     }
 

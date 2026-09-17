@@ -46,8 +46,16 @@ async function fetchReportById(req,res){
             message:"Report ID is required"
         })
     }
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+            message: "Invalid report ID",
+        });
+    }   
 
-    const report= await reportModel.findById(id);
+    const report= await reportModel.findOne({
+        _id: id,
+        user: req.user._id,
+    });
 
     if(!report){
         return res.status(404).json({
@@ -90,8 +98,16 @@ async function downloadUpdatedResume(req,res){
             message:"Report ID is required"
         })
     }
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+            message: "Invalid report ID",
+        });
+    }
 
-    const report = await reportModel.findById(id);
+    const report = await reportModel.findOne({
+        _id:id,
+        user:req.user._id,
+    });
 
     if(!report){
         return res.status(404).json({
