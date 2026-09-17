@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useReport } from "../hooks/useReport";
 import "../interviewReport.css";
-import { useParams } from "react-router";
 import { ThreeDot } from "react-loading-indicators";
 
 const tabs = [
@@ -32,20 +31,9 @@ const QuestionCard = ({ item, index }) => (
 
 const Report = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const { report, loading, handleGetReportById } = useReport();
-  // const { reportId } = useParams();
-
-  // useEffect(() => {
-  //   const fetchReport = async () => {
-  //     const cachedReportId = report?._id?.toString();
-
-  //     if (reportId && cachedReportId !== reportId) {
-  //       await handleGetReportById({ reportId });
-  //     }
-  //   };
-
-  //   fetchReport();
-  // }, [reportId, report?._id]);
+  const [downloadingResume, setDownloadingResume] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const { report, loading, handleUpdateResume } = useReport();
 
   if (loading || !report) {
     return (
@@ -54,6 +42,34 @@ const Report = () => {
       </div>
     );
   }
+
+  const handleDownloadResume = async () => {
+    setDownloadingResume(true);
+    setDownloadError("");
+
+    try {
+      const resumePdf = await handleUpdateResume({ reportId: report._id });
+      const downloadUrl = URL.createObjectURL(resumePdf);
+      const link = document.createElement("a");
+      const fileName = (report.jobTitle || "targeted-resume")
+        .replace(/[^a-z0-9]+/gi, "-")
+        .replace(/^-|-$/g, "")
+        .toLowerCase();
+
+      link.href = downloadUrl;
+      link.download = `${fileName || "targeted-resume"}-resume.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+    } catch {
+      setDownloadError(
+        "We could not create your tailored resume. Please try again.",
+      );
+    } finally {
+      setDownloadingResume(false);
+    }
+  };
 
   const renderQuestions = (questions) => (
     <div className="question-list">
@@ -99,6 +115,25 @@ const Report = () => {
             <div className="score-track">
               <span style={{ width: `${report.matchScore}%` }} />
             </div>
+          </div>
+          <div className="resume-download">
+            <button
+              className="download-button"
+              type="button"
+              onClick={handleDownloadResume}
+              disabled={downloadingResume}
+            >
+              <span aria-hidden="true">↓</span>
+              {downloadingResume
+                ? "Preparing resume..."
+                : "Download targeted resume"}
+            </button>
+            <small>Tailored to this job from your verified experience.</small>
+            {downloadError && (
+              <p className="download-error" role="alert">
+                {downloadError}
+              </p>
+            )}
           </div>
         </header>
 

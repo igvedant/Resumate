@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import {generateReport, getReportById, getAllReports} from "../services/interviewReport.api";
+import {generateReport, getReportById, getAllReports, updateResume} from "../services/interviewReport.api";
 import { InterviewReportContext } from "../interviewReport.context";
 import { useParams } from "react-router";
 
@@ -46,6 +46,15 @@ export const useReport=()=>{
         }
     }
 
+    const handleUpdateResume = async ({reportId})=>{
+        try{
+            return await updateResume({reportId});
+        }catch(err){
+            console.log(err);
+            throw err;
+        }
+    }
+
     useEffect(()=>{
         const cachedReportId = report?._id?.toString();
 
@@ -57,5 +66,5 @@ export const useReport=()=>{
         }
     },[]);
 
-    return {loading, report, reportIds, handleGenerateReport, handleGetReportById, handleGetAllReports};
+    return {loading, report, reportIds, handleGenerateReport, handleGetReportById, handleGetAllReports, handleUpdateResume};
 }

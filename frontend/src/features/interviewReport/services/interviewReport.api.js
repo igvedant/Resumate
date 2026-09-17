@@ -26,3 +26,10 @@ export async function getAllReports(){
     const response = await api.get("/api/report/getAll");
     return response.data;
 }
+
+export async function updateResume({ reportId}){
+    const response = await api.post(`/api/report/updateResume/${reportId}`, null, {
+        responseType: "blob",
+    });
+    return response.data;
+}
