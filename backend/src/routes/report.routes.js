@@ -25,7 +25,7 @@ router.post("/generate", authMiddleware.validateToken, reportGenerationLimiter, 
 router.get("/fetch/:id", authMiddleware.validateToken, asyncHandler(reportController.fetchReportById));
 
 /**
- * @route GET /api/reports
+ * @route GET /api/report
  * @description fetches all the reports of the logged in user
  * @access private
  */

@@ -170,7 +170,10 @@ async function generateReport({resume, selfDescription, jobDescription}){
 }
 
 async function htmlToPdf(htmlContent){
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        headless: "new",
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
     try {
         const page = await browser.newPage();
         await page.setContent(htmlContent, {waitUntil:"networkidle0"});
@@ -255,6 +258,11 @@ async function updateResume({report}){
     });
 
     const resumeHtml = resumeSchema.parse(JSON.parse(interaction.output_text)).resumeHtml;
+
+    if (!/^<!doctype html[\s>]/i.test(resumeHtml.trim()) || !/<\/html>\s*$/i.test(resumeHtml.trim())) {
+        throw new Error("AI returned invalid resume HTML");
+    }
+
     return htmlToPdf(resumeHtml);
 }
 
