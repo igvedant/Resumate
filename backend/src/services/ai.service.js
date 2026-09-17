@@ -231,17 +231,29 @@ async function updateResume({report}){
                 INTERVIEW ANALYSIS REPORT:
                 ${JSON.stringify(report, null, 2)}
     `;
+    const resumeJsonSchema = {
+        type:"object",
+        properties:{
+            resumeHtml:{
+                type:"string",
+                description:"The updated resume in HTML format"
+            }
+        },
+        required:["resumeHtml"]
+    };
+    const resumeSchema = z.fromJSONSchema(resumeJsonSchema);
 
     const interaction = await ai.interactions.create({
         model:"gemini-3.1-flash-lite",
         input:prompt,
         response_format:{
             type:"text",
-            mime_type:"text/html"
+            mime_type:"application/json",
+            schema:resumeJsonSchema
         }
     });
 
-    const resumeHtml =interaction.output_text.trim();
+    const resumeHtml = resumeSchema.parse(JSON.parse(interaction.output_text)).resumeHtml;
     return htmlToPdf(resumeHtml);
 }
 
