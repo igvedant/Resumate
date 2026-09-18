@@ -4,8 +4,6 @@ const blacklistedTokenSchema= new mongoose.Schema({
     accessToken:{
         type:String,
         required:false,
-        unique:true,
-        sparse:true,
     },
     refreshToken:{
         type:String,
@@ -15,5 +13,12 @@ const blacklistedTokenSchema= new mongoose.Schema({
 },{timestamps:true});
 
 blacklistedTokenSchema.index({createdAt:1},{expireAfterSeconds:60*60*24*7});
+blacklistedTokenSchema.index(
+    {accessToken:1},
+    {
+        unique:true,
+        partialFilterExpression:{accessToken:{$type:"string"}},
+    },
+);
 
 module.exports=mongoose.model("blacklistedTokens", blacklistedTokenSchema);
