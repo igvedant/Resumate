@@ -44,7 +44,7 @@ const Register = () => {
           <div className="input-group">
             <label htmlFor="name">Name</label>
             <input
-              type="password"
+              type="text"
               name="name"
               autoComplete="name"
               required
