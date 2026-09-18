@@ -1,16 +1,89 @@
-# React + Vite
+# Frontend README
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for Resumate. It handles login, registration, report generation, route protection, and report viewing.
 
-Currently, two official plugins are available:
+## What it does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- User sign up and login
+- Protect auth-only pages
+- Upload a PDF resume
+- Submit job description and self-description
+- Generate and view interview analysis
+- Download a tailored resume PDF
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- Vite
+- React Router
+- Axios
 
-## Expanding the ESLint configuration
+## Main structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```text
+frontend/
+├── src/
+│   ├── app.routes.jsx
+│   ├── services/api.js
+│   └── features/
+│       ├── auth/
+│       └── interviewReport/
+├── package.json
+├── vite.config.js
+├── index.html
+├── .env.example
+└── README.md
+```
+
+## Routes
+
+```text
+/login
+/register
+/
+/report/:reportId
+```
+
+## Auth flow
+
+- User logs in or registers
+- Access token is stored in localStorage
+- API client adds the token to requests
+- If the token expires, it refreshes automatically
+- Protected pages redirect unauthenticated users to login
+
+## Report flow
+
+1. User uploads a PDF resume.
+2. User enters the job description and self-description.
+3. Frontend sends the form to the backend.
+4. Report is displayed with tabs for overview, technical, behavioural, skill gaps, and preparation plan.
+5. User can download a tailored resume PDF.
+
+## Environment
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+## Run locally
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Production notes
+
+- Set `VITE_API_URL` to the deployed backend URL
+- Keep the frontend behind HTTPS
+- Use secure deployment settings in Vercel
+- Handle auth refresh errors gracefully
+
+## Helpful files
+
+- [src/app.routes.jsx](src/app.routes.jsx)
+- [src/services/api.js](src/services/api.js)
+- [src/features/auth/hooks/useAuth.js](src/features/auth/hooks/useAuth.js)
+- [src/features/interviewReport/hooks/useReport.js](src/features/interviewReport/hooks/useReport.js)
